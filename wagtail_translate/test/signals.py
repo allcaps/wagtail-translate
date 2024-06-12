@@ -1,6 +1,6 @@
 from django.dispatch import receiver
 from wagtail.models import Page, TranslatableMixin
-from .translate import Translator, LLAMA2Translator
+from wagtail_translate import Translator
 import django.dispatch
 
 copy_for_translation_done = django.dispatch.Signal()
@@ -51,5 +51,3 @@ def actual_translation(sender, source_obj, target_obj, **kwargs):
         translated_obj.save_revision().publish()
     else:
         translated_obj.save()
-
-

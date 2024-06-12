@@ -258,33 +258,3 @@ class Translator:
             setattr(target_obj, field.name, translation)
 
         return target_obj
-
-
-import ollama
-
-
-modelfile='''
-FROM llama2
-SYSTEM You are assisting a user in translating content for their website. The user has provided some text (following the colon) in English. Translate to Dutch. Only return the translation. Nothing else.:
-'''
-
-ollama.create(model='llama2_translator', modelfile=modelfile)
-
-
-class LLAMA2Translator(Translator):
-    def translate(self, source_string: str) -> str:
-        """
-        Translate, a function that does the actual translation.
-        The translation service is provided by the LLAMA service.
-        """
-
-        if source_string.strip() == "":
-            return ""
-
-        response = ollama.chat(model='llama2_translator', messages=[
-            {
-                'role': 'user',
-                'content': f"Translate from English to Dutch: {source_string}",
-            },
-        ])
-        return response['message']['content']
