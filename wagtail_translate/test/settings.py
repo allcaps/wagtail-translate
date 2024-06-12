@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ["localhost", "testserver"]
 
 INSTALLED_APPS = [
     "wagtail_translate",
-    "wagtail_translate.test",
+    "wagtail.contrib.simple_translation",
     "wagtail.contrib.search_promotions",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -129,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/stable/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
 TIME_ZONE = "UTC"
 
