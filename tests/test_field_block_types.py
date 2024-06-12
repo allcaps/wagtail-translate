@@ -1,12 +1,11 @@
 import pytest
-from django.utils.crypto import get_random_string
-from wagtail.models import Page, Site
 
-from testproject.home.models import HomePage, BlogIndexPage, BlogPostPage
+from django.utils.crypto import get_random_string
+from testproject.home.models import BlogIndexPage, BlogPostPage, HomePage
+from wagtail.models import Page, Site
 
 
 class TestFieldBlockTypes:
-
     @pytest.fixture
     def page(self):
         home = HomePage.objects.first()
@@ -32,29 +31,24 @@ class TestFieldBlockTypes:
 
     def test_translate_text(self):
         self.blog_post.body = [
-            {'paragraph': 'This is a paragraph.'},
+            {"paragraph": "This is a paragraph."},
         ]
         self.home.copy_for_translation()
 
     def test_translate_richtext(self):
         pass
 
-
     def test_translate_raw_html(self):
         pass
-
 
     def test_translate_struct(self):
         pass
 
-
     def test_translate_block_quote(self):
         pass
 
-
     def test_translate_chooser(self):
         pass
-
 
     def test_translate_page_chooser(self):
         pass

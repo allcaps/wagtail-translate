@@ -5,7 +5,13 @@ For now, we monkeypatch the `CopyPageForTranslationAction.walk` and
 `CopyPageForTranslationAction.execute` methods
 to register the copy_for_translation_done signals.
 """
+
+import logging
+
 from wagtail.actions.copy_for_translation import CopyPageForTranslationAction
+
+
+logger = logging.getLogger(__name__)
 
 
 def new_walk(self, current_page):
@@ -19,10 +25,13 @@ def new_walk(self, current_page):
         )
 
         # Send signal
-        from babelfish.signals import copy_for_translation_done
-        copy_for_translation_done.send(sender=self.__class__,
-                                       source_obj=child_page.specific,
-                                       target_obj=translated_page)
+        from wagtail_translate.test.signals import copy_for_translation_done
+
+        copy_for_translation_done.send(
+            sender=self.__class__,
+            source_obj=child_page.specific,
+            target_obj=translated_page,
+        )
 
         self.walk(child_page)
 
@@ -35,8 +44,11 @@ def new_execute(self, skip_permission_checks=False):
     )
 
     # Send signal
-    from babelfish.signals import copy_for_translation_done
-    copy_for_translation_done.send(sender=self.__class__, source_obj=self.page, target_obj=translated_page)
+    from wagtail_translate.test.signals import copy_for_translation_done
+
+    copy_for_translation_done.send(
+        sender=self.__class__, source_obj=self.page, target_obj=translated_page
+    )
 
     if self.include_subtree:
         self.walk(self.page)
@@ -44,9 +56,11 @@ def new_execute(self, skip_permission_checks=False):
     return translated_page
 
 
-# logger.warning(
-#     "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.walk, send copy_for_translation_done signal")
-# logger.warning(
-#     "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.execute, send copy_for_translation_done signal")
+logger.warning(
+    "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.walk, send copy_for_translation_done signal"
+)
+logger.warning(
+    "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.execute, send copy_for_translation_done signal"
+)
 CopyPageForTranslationAction.walk = new_walk
 CopyPageForTranslationAction.execute = new_execute

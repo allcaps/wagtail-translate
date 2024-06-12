@@ -1,9 +1,8 @@
 from django.db import models
-from modelcluster.fields import ParentalKey, ParentalManyToManyField
-from modelcluster.models import ClusterableModel, get_all_child_relations
+from modelcluster.fields import ParentalKey
 from treebeard.mp_tree import MP_Node
 from wagtail.fields import RichTextField, StreamField
-from wagtail.models import COMMENTS_RELATION_NAME, Page, TranslatableMixin
+from wagtail.models import Page, TranslatableMixin
 
 
 def get_translatable_fields(model):
@@ -26,7 +25,6 @@ def get_translatable_fields(model):
     translatable_fields = []
 
     for field in model._meta.get_fields():
-
         # Ignore automatically generated ID fields
         if isinstance(field, models.AutoField):
             continue
@@ -78,9 +76,7 @@ def get_translatable_fields(model):
             continue
 
         # Text fields should translate
-        if isinstance(
-            field, (models.TextField, models.CharField)
-        ):
+        if isinstance(field, (models.TextField, models.CharField)):
             translatable_fields.append(field)
             continue
 

@@ -3,7 +3,6 @@ import codecs
 from bs4 import BeautifulSoup, NavigableString
 from wagtail import blocks
 from wagtail.fields import RichTextField, StreamField
-
 from wagtail.rich_text import RichText
 
 from .fields import get_translatable_fields
@@ -62,7 +61,7 @@ class Translator:
         self.source_language_code  # noqa
         self.target_language_code  # noqa
 
-        return codecs.encode(source_string, 'rot13')
+        return codecs.encode(source_string, "rot13")
 
     def translate_html_string(self, string: str) -> str:
         """
@@ -87,10 +86,10 @@ class Translator:
         Translate attributes, title and alt.
         """
         for tag in soup.find_all():
-            if tag.has_attr('title'):
-                tag['title'] = self.translate(tag['title'])
-            if tag.has_attr('alt'):
-                tag['alt'] = self.translate(tag['alt'])
+            if tag.has_attr("title"):
+                tag["title"] = self.translate(tag["title"])
+            if tag.has_attr("alt"):
+                tag["alt"] = self.translate(tag["alt"])
 
     def translate_html(self, html: str) -> str:
         """
@@ -119,9 +118,7 @@ class Translator:
             for child in soup.children:
                 if isinstance(child, NavigableString):
                     # Translate navigable strings
-                    child.string.replace_with(
-                        self.translate_html_string(child.string)
-                    )
+                    child.string.replace_with(self.translate_html_string(child.string))
                 else:
                     # Recursively walk the tree
                     walk(child)

@@ -1,7 +1,10 @@
+import django.dispatch
+
 from django.dispatch import receiver
 from wagtail.models import Page, TranslatableMixin
-from wagtail_translate import Translator
-import django.dispatch
+
+from wagtail_translate.translate import Translator
+
 
 copy_for_translation_done = django.dispatch.Signal()
 

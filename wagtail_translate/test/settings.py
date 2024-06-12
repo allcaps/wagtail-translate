@@ -26,7 +26,7 @@ SECRET_KEY = "not-a-secure-key"  # noqa: S105
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "testserver"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["localhost", "testserver"]
 INSTALLED_APPS = [
     "wagtail_translate",
     "wagtail.contrib.simple_translation",
+    "wagtail.locales",
     "wagtail.contrib.search_promotions",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -139,6 +141,19 @@ USE_L10N = True
 
 USE_TZ = True
 
+WAGTAIL_I18N_ENABLED = True
+
+
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    (LANGUAGE_CODE, "English"),
+    ("fr", "French"),
+    ("nl", "Dutch"),
+]
+
+
+MIDDLEWARE += [
+    "django.middleware.locale.LocaleMiddleware",
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/stable/howto/static-files/
@@ -159,3 +174,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "test-media")
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "Wagtail Translate test site"
+
+
+WSGI_APPLICATION = "wagtail_translate.test.wsgi.application"

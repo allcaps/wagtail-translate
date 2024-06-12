@@ -20,7 +20,47 @@ Use Wagtail Translate to machine translate your Wagtail contents.
 - Django ...
 - Wagtail ...
 
+## Setup i18n
+
+First, set up your project following the official Wagtail i18n instructions:
+https://docs.wagtail.org/en/stable/advanced_topics/i18n.html
+
+### TL;DR
+
+```python
+# settings.py
+USE_I18N = True
+WAGTAIL_I18N_ENABLED = True
+USE_L10N = True
+
+LANGUAGE_CODE = 'en'
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ('en', "English"),
+    ('fr', "French"),
+]
+
+INSTALLED_APPS += [
+    "wagtail.locales",
+]
+
+MIDDLEWARE += [
+    'django.middleware.locale.LocaleMiddleware',
+]
+
+# urls.py
+from django.conf.urls.i18n import i18n_patterns
+
+urlpatterns += i18n_patterns(
+    path("", include(wagtail_urls)),
+)
+```
+
+Create the French locale at: `/admin/locales/new/`
+
+
 ## Installation
+
+```python
 
 ```shell
 python -m pip install wagtail-translate
@@ -29,7 +69,7 @@ python -m pip install wagtail-translate
 ``` python
 INSTALLED_APPS = [
     "wagtail_translate",
-    "simple_translation",
+    "wagtail.contrib.simple_translation",
     ...
 ]
 ```
@@ -104,7 +144,7 @@ def actual_translation(sender, source_obj, target_obj, **kwargs):
         translated_obj.save()
 ```
 
-In Wagtail admin interface, use Wagtail Simple Translation to copy a page to another locale. 
+In Wagtail admin interface, go to the homepage `/admin/pages/2/`, in the dot-dot-dot-menu, choose "Translate".
 
 The contents should be translated.
 
