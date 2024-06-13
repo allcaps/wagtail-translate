@@ -5,7 +5,7 @@ from wagtail import blocks
 from wagtail.fields import RichTextField, StreamField
 from wagtail.rich_text import RichText
 
-from .fields import get_translatable_fields
+from ..fields import get_translatable_fields
 
 
 def lstrip_keep(text: str) -> (str, str):
