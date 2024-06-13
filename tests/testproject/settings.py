@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 # Application definition
 
 INSTALLED_APPS = [
+    "tests.testapp",
     "wagtail_translate",
     "wagtail.contrib.simple_translation",
     "wagtail.locales",
@@ -73,7 +74,7 @@ MIDDLEWARE = [
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
 
-ROOT_URLCONF = "wagtail_translate.test.urls"
+ROOT_URLCONF = "tests.testproject.urls"
 
 TEMPLATES = [
     {
@@ -174,6 +175,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "test-media")
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "Wagtail Translate test site"
-
-
-WSGI_APPLICATION = "wagtail_translate.test.wsgi.application"

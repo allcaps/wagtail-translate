@@ -7,7 +7,7 @@ from django.core.management import execute_from_command_line
 
 
 def main():
-    os.environ["DJANGO_SETTINGS_MODULE"] = "wagtail_translate.test.settings"
+    os.environ["DJANGO_SETTINGS_MODULE"] = "tests.testproject.settings"
     execute_from_command_line(sys.argv)
 
 

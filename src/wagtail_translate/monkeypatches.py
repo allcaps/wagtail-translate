@@ -25,7 +25,7 @@ def new_walk(self, current_page):
         )
 
         # Send signal
-        from wagtail_translate.test.signals import copy_for_translation_done
+        from wagtail_translate.signals import copy_for_translation_done
 
         copy_for_translation_done.send(
             sender=self.__class__,
@@ -44,7 +44,7 @@ def new_execute(self, skip_permission_checks=False):
     )
 
     # Send signal
-    from wagtail_translate.test.signals import copy_for_translation_done
+    from wagtail_translate.signals import copy_for_translation_done
 
     copy_for_translation_done.send(
         sender=self.__class__, source_obj=self.page, target_obj=translated_page

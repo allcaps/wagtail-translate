@@ -40,6 +40,7 @@ testing = [
     "pytest==8.1.1",
     "pytest-cov==5.0.0",
     "pytest-django==4.8.0",
+    "pytest-factoryboy==2.7.0",
 ]
 ci = [
     "tox==4.11.3",
@@ -54,10 +55,9 @@ name = "wagtail_translate"
 
 [tool.flit.sdist]
 exclude = [
-    "wagtail_translate/static_src",
-    "wagtail_translate/test",
-    "wagtail_translate/static/wagtail_translate/js/.gitignore",
-    "testmanage.py",
+    "manage.py",
+    "*.yaml",
+    "ruff.toml",
     ".*",
     "*.js",
     "*.json",
@@ -66,4 +66,4 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "wagtail_translate.test.settings"
+DJANGO_SETTINGS_MODULE = "tests.testproject.settings"
