@@ -21,7 +21,7 @@ class DeepLTranslator(BaseTranslator):
         Translate, a function that does the actual translation.
         The translation service is provided by the DeepL service.
         """
-        translator = deepl.BaseTranslator(self.auth_key)
+        translator = deepl.Translator(self.auth_key)
         if source_string == "":
             return ""
         translation = translator.translate_text(
