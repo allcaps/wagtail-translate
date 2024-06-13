@@ -1,5 +1,3 @@
-import codecs
-
 from bs4 import BeautifulSoup, NavigableString
 from wagtail import blocks
 from wagtail.fields import RichTextField, StreamField
@@ -39,7 +37,7 @@ class BlockItem:
         self.value = value
 
 
-class Translator:
+class BaseTranslator:
     source_language_code: str
     target_language_code: str
 
@@ -50,18 +48,18 @@ class Translator:
     def translate(self, source_string: str) -> str:
         """
         Translate, a function that does the actual translation.
-        This will be replaced by a call to a translation service.
+        This will be replaced by a call to some translation service.
 
-        ROT13 is its own inverse. Because there are 26 letters (2×13) in the
-        Latin alphabet, applying ROT13 to a piece of text twice will give the
-        original text.
+        You'd supply the following values to the translation service:
+        - source_string
+        - self.source_language_code
+        - self.target_language_code
+
         """
-        # Rot13 does not need the language codes,
-        # but a real translation service would.
-        self.source_language_code  # noqa
-        self.target_language_code  # noqa
-
-        return codecs.encode(source_string, "rot13")
+        raise NotImplementedError(
+            "Subclasses must implement this method. "
+            "Call some translation service, and return the translated value."
+        )
 
     def translate_html_string(self, string: str) -> str:
         """
