@@ -189,7 +189,7 @@ flit install
 Note that this project uses [pre-commit](https://github.com/pre-commit/pre-commit).
 It is included in the project testing requirements. To set up locally:
 
-```shell
+```sh
 # go to the project directory
 $ cd wagtail-translate
 # initialize pre-commit
