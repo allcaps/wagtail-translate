@@ -1,13 +1,19 @@
-import os
-
 import deepl
+
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import BaseTranslator
 
 
 class DeepLTranslator(BaseTranslator):
     def __init__(self, source_language_code: str, target_language_code: str) -> None:
-        self.auth_key = os.getenv("DEEPL_AUTH_KEY")
+        if hasattr(settings, "WAGTAIL_TRANSLATE_DEEPL_KEY"):
+            self.auth_key = settings.WAGTAIL_TRANSLATE_DEEPL_KEY
+        else:
+            raise ImproperlyConfigured(
+                "Please set WAGTAIL_TRANSLATE_DEEPL_KEY in your settings file."
+            )
         super().__init__(source_language_code, target_language_code)
 
     def translate(self, source_string: str) -> str:
