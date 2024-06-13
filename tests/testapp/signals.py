@@ -2,7 +2,7 @@ from django.dispatch import receiver
 from wagtail.models import Page, TranslatableMixin
 
 from wagtail_translate.signals import copy_for_translation_done
-from wagtail_translate.translators.base import Translator
+from wagtail_translate.translators.rot13 import ROT13Translator
 
 
 @receiver(copy_for_translation_done)
@@ -37,7 +37,7 @@ def actual_translation(sender, source_obj, target_obj, **kwargs):
     target_language_code = target_obj.locale.language_code
 
     # Initialize the translator, and translate.
-    translator = Translator(source_language_code, target_language_code)
+    translator = ROT13Translator(source_language_code, target_language_code)
     translated_obj = translator.translate_obj(source_obj, target_obj)
 
     # Differentiate between regular Django model and Wagtail Page.
