@@ -2,10 +2,10 @@ import os
 
 import deepl
 
-from .base import Translator
+from .base import BaseTranslator
 
 
-class DeepLTranslator(Translator):
+class DeepLTranslator(BaseTranslator):
     def __init__(self, source_language_code: str, target_language_code: str) -> None:
         self.auth_key = os.getenv("DEEPL_AUTH_KEY")
         super().__init__(source_language_code, target_language_code)
@@ -15,7 +15,7 @@ class DeepLTranslator(Translator):
         Translate, a function that does the actual translation.
         The translation service is provided by the DeepL service.
         """
-        translator = deepl.Translator(self.auth_key)
+        translator = deepl.BaseTranslator(self.auth_key)
         if source_string == "":
             return ""
         translation = translator.translate_text(
