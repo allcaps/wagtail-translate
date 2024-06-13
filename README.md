@@ -60,9 +60,8 @@ Create the French locale at: `/admin/locales/new/`
 
 ## Installation
 
-```python
 
-```shell
+```sh
 python -m pip install wagtail-translate
 ```
 
