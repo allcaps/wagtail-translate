@@ -91,7 +91,7 @@ Create a `signals.py`:
 ```python
 from django.dispatch import receiver
 from wagtail.models import Page, TranslatableMixin
-from wagtail_translate import Translator
+from wagtail_translate.translators.rot13 import ROT13Translator as Translator
 import django.dispatch
 
 copy_for_translation_done = django.dispatch.Signal()
@@ -148,6 +148,14 @@ In Wagtail admin interface, go to the homepage `/admin/pages/2/`, in the dot-dot
 
 The contents should be translated.
 
+## Deepl
+
+Install and configure [DeepL](https://www.deepl.com/) translator:
+
+- `pip install deepl`
+- Get a DeepL API key from https://www.deepl.com/pro#developer
+- Add `WAGTAIL_TRANSLATE_DEEPL_KEY` to your settings.
+- In your `signals.py`: `from wagtail_translate.translators.deepl import DeeplTranslator as Translator`
 
 ## Contributing
 
