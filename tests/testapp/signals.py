@@ -2,7 +2,7 @@ from django.dispatch import receiver
 from wagtail.models import Page, TranslatableMixin
 
 from wagtail_translate.signals import copy_for_translation_done
-from wagtail_translate.translate import Translator
+from wagtail_translate.translators.base import Translator
 
 
 @receiver(copy_for_translation_done)
