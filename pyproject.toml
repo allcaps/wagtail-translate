@@ -41,6 +41,7 @@ testing = [
     "pytest-cov==5.0.0",
     "pytest-django==4.8.0",
     "pytest-factoryboy==2.7.0",
+    "wagtail_factories==4.2.1",
 ]
 ci = [
     "tox==4.11.3",

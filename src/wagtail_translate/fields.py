@@ -93,7 +93,7 @@ def get_translatable_fields(model):
             ):
                 continue
 
-            # Foreign keys to translatable models should be translatable.
+            # Foreign keys to translatable models should be translated.
             # With the exception of pages that are special because we can localize them at runtime easily.
             # TODO: Perhaps we need a special type for pages where it links to the translation if availabe,
             # but falls back to the source if it isn't translated yet?
