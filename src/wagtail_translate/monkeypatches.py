@@ -8,6 +8,8 @@ to register the copy_for_translation_done signals.
 
 import logging
 
+import wagtail
+
 from wagtail.actions.copy_for_translation import CopyPageForTranslationAction
 
 
@@ -56,11 +58,14 @@ def new_execute(self, skip_permission_checks=False):
     return translated_page
 
 
-logger.warning(
-    "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.walk, send copy_for_translation_done signal"
-)
-logger.warning(
-    "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.execute, send copy_for_translation_done signal"
-)
-CopyPageForTranslationAction.walk = new_walk
-CopyPageForTranslationAction.execute = new_execute
+# Wagtail 6.2 introduces the `copy_for_translation_done` signal.
+# Only apply the monkeypatch if Wagtail < 6.2.
+if wagtail.VERSION[0] < 6 or (wagtail.VERSION[0] == 6 and wagtail.VERSION[1] < 2):
+    logger.warning(
+        "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.walk, send copy_for_translation_done signal"
+    )
+    logger.warning(
+        "Monkeypatching wagtail.actions.copy_for_translation.CopyPageForTranslationAction.execute, send copy_for_translation_done signal"
+    )
+    CopyPageForTranslationAction.walk = new_walk
+    CopyPageForTranslationAction.execute = new_execute
