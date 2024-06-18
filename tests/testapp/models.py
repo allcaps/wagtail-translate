@@ -21,6 +21,14 @@ class ImageBlock(blocks.StructBlock):
         icon = "image"
 
 
+class BlogIndexPage(Page):
+    introduction = models.TextField(blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("introduction"),
+    ]
+
+
 @register_snippet
 class BlogCategory(TranslatableMixin):
     name = models.CharField(max_length=255)
@@ -33,7 +41,7 @@ class BlogPostPage(Page):
     intro = RichTextField(blank=True)
     publication_date = models.DateField(null=True, blank=True)
     image = models.ForeignKey(
-        "wagtailimages.Image", on_delete=models.SET_NULL, null=True
+        "wagtailimages.Image", on_delete=models.SET_NULL, null=True, blank=True
     )
 
     body = StreamField(
@@ -73,7 +81,11 @@ class BlogPostPage(Page):
         use_json_field=True,
     )
     category = models.ForeignKey(
-        BlogCategory, on_delete=models.SET_NULL, null=True, related_name="blog_posts"
+        BlogCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="blog_posts",
     )
 
     content_panels = Page.content_panels + [
@@ -82,12 +94,4 @@ class BlogPostPage(Page):
         FieldPanel("image"),
         FieldPanel("body"),
         FieldPanel("category"),
-    ]
-
-
-class BlogIndexPage(Page):
-    introduction = models.TextField(blank=True)
-
-    content_panels = Page.content_panels + [
-        FieldPanel("introduction"),
     ]
