@@ -209,7 +209,7 @@ tox
 or, you can run them for a specific environment `tox -e python3.11-django4.2-wagtail5.1` or specific test
 `tox -e python3.11-django4.2-wagtail5.1-sqlite wagtail-translate.tests.test_file.TestClass.test_method`
 
-To run the test app interactively, use `tox -e interactive`, visit `http://127.0.0.1:8020/admin/` and log in with `admin`/`changeme`.
+To run the test app interactively, use `tox -e interactive`, visit `http://127.0.0.1:8000/admin/` and log in with `admin`/`changeme`.
 
 ### Project template
 
