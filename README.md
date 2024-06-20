@@ -70,49 +70,14 @@ python -m pip install wagtail-translate
 ``` python
 INSTALLED_APPS = [
     "wagtail_translate",
+    "wagtail_translate.default_behaviour",
     ...
 ]
+
+WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
 ```
 
-In your `apps.py`:
 
-``` python
-from django.apps import AppConfig
-
-
-class YourAppConfig(AppConfig):
-    ...
-
-    def ready(self):
-        from . import signals  # noqa
-```
-Create a `signals.py`:
-
-```python
-from django.dispatch import receiver
-from wagtail.models import Page
-from wagtail_translate.translators.rot13 import ROT13Translator as Translator
-
-# Wagtail 6.2 introduces the `copy_for_translation_done` signal
-try:
-    from wagtail.signals import copy_for_translation_done
-except ImportError:
-    from wagtail_translate.signals import copy_for_translation_done
-
-
-@receiver(copy_for_translation_done)
-def handle_translation_done_signal(sender, source_obj, target_obj, **kwargs):
-    source_language_code = source_obj.locale.language_code
-    target_language_code = target_obj.locale.language_code
-
-    translator = Translator(source_language_code, target_language_code)
-    translated_obj = translator.translate_obj(source_obj, target_obj)
-
-    if isinstance(translated_obj, Page):
-        translated_obj.save_revision()
-    else:
-        translated_obj.save()
-```
 In the Wagtail admin interface, go to the homepage, in the dot-dot-dot-menu, choose "Translate".
 
 The contents should be translated! 🥳
@@ -127,13 +92,64 @@ Install and configure it as follows:
 - `pip install deepl`
 - Get a DeepL API key from https://www.deepl.com/pro#developer
 - Add `WAGTAIL_TRANSLATE_DEEPL_KEY = "..."` to your settings.
-- In your `signals.py` change the import to `from wagtail_translate.translators.deepl import DeeplTranslator as Translator`
+- Change `WAGTAIL_TRANSLATE_TRANSLATOR` to `"wagtail_translate.translators.deepl.DeepLTranslator"`.
 
 ## Customizing Translation Logic
 
-Multi-language projects often have specific requirements for the translation process. The signal receiver allows developers to tailor the translation process to their needs. For instance, you can customize the translator or adjust other aspects of the translation logic.
+Multi-language projects often have specific requirements for the translation process. Wagtail Translate allows developers to tailor the translation process to their needs.
 
-The following sections provide examples of how to customize the translation logic. These are illustrations and not mandatory for using this package.
+This section provides examples of how to customize the translation logic. These are illustrations and not mandatory for using this package.
+
+### Customizing the translation process, the basics
+
+In `settings.py`:
+- Remove `"wagtail_translate.default_behaviour"` from `INSTALLED_APPS`.
+- Remove `WAGTAIL_TRANSLATE_TRANSLATOR = "..."` from the settings.
+
+In one of your project apps, in `apps.py`:
+
+```python
+from django.apps import AppConfig
+
+
+class YourAppConfig(AppConfig):
+    name = "your_app"
+
+    def ready(self):
+        from . import signals  # noqa
+```
+Add `signals.py` to your app:
+
+```python
+from django.dispatch import receiver
+from wagtail.models import Page
+
+from wagtail_translate.translators.deepl import DeepLTranslator
+
+# Wagtail 6.2 introduces the `copy_for_translation_done` signal.
+try:
+    from wagtail.signals import copy_for_translation_done
+except ImportError:
+    from wagtail_translate.signals import copy_for_translation_done
+
+@receiver(copy_for_translation_done)
+def handle_translation_done_signal(sender, source_obj, target_obj, **kwargs):
+    # Get the source and target language codes
+    source_language_code = source_obj.locale.language_code
+    target_language_code = target_obj.locale.language_code
+
+    # Initialize the translator, and translate.
+    translator = DeepLTranslator(source_language_code, target_language_code)
+    translated_obj = translator.translate_obj(source_obj, target_obj)
+
+    # Differentiate between regular Django model and Wagtail Page.
+    if isinstance(translated_obj, Page):
+        translated_obj.save_revision()
+    else:
+        translated_obj.save()
+```
+
+You now have ejected from the Wagtail Translate default behaviour and can customize the translation process.
 
 ### Using a custom translation service
 
@@ -158,11 +174,7 @@ class CustomTranslator(BaseTranslator):
         translation = ...  # Your translation logic here
         return translation
 ```
-To use the custom translator in your `signals.py` update the import statement to:
-
-```python
-from your_app.translators import CustomTranslator as Translator
-```
+Import your `CustomTranslator` in `signals.py` and use it.
 
 ### Using different translation services for various languages
 
