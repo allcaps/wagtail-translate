@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 INSTALLED_APPS = [
     "tests.testapp",
     "wagtail_translate",
+    "wagtail_translate.default_behaviour",
     "wagtail.contrib.simple_translation",
     "wagtail.locales",
     "wagtail.contrib.search_promotions",
@@ -61,6 +62,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
 ]
+
+WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
