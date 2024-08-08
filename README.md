@@ -1,6 +1,10 @@
 # Wagtail Translate
 
-Use Wagtail Translate to machine translate your Wagtail contents.
+**Wagtail Translate** adds machine translations to your Wagtail site, with built-in support for [DeepL](https://www.deepl.com) and the flexibility to integrate other translation services. It automatically detects when a page is copied to a new locale and initiates the translation process.
+
+For multilingual websites, the recommended packages are [Wagtail Localize](https://wagtail-localize.org/) or [Wagtail Simple Translation](https://docs.wagtail.org/en/stable/reference/contrib/simple_translation.html). Wagtail Localize offers advanced features that may be excessive for many projects, while Wagtail Simple Translation only copies pages to new locales, requiring manual translation.
+
+**Wagtail Translate** adds machine translations to Wagtail and works in combination with Simple Translation, offering the ideal solution for projects seeking a simple interface with powerful translation support.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/wagtail-translate.svg)](https://badge.fury.io/py/wagtail-translate)
@@ -25,8 +29,7 @@ Use Wagtail Translate to machine translate your Wagtail contents.
 You need to configure your project for authoring content in multiple languages.
 See Wagtail documentation on [internationalization](https://docs.wagtail.org/en/stable/advanced_topics/i18n.html).
 
-
-### TL;DR
+In summary:
 
 ```python
 # settings.py
@@ -57,11 +60,10 @@ urlpatterns += i18n_patterns(
 )
 ```
 
-Create the French locale at: `/admin/locales/new/`
+Create the French locale at: `/admin/locales/new/`.
 
 
 ## Installation
-
 
 ```sh
 python -m pip install wagtail-translate
@@ -82,155 +84,25 @@ In the Wagtail admin interface, go to the homepage, in the dot-dot-dot-menu, cho
 
 The contents should be translated! 🥳
 
-This example uses the `ROT13Translator`. It shifts each letter by 13 places. Applying it twice will return the text to its original form. So ROT13 is good for testing and evaluation, but not for real-world use.
+### ROT13Translator
 
-## Deepl
+The installation example uses the `ROT13Translator`. It shifts each letter by 13 places.
+Applying it twice will return the text to its original form.
+ROT13 is good for testing and evaluation, but not for real-world use.
 
-Wagtail Translation has a [DeepL](https://www.deepl.com/) translator.
+### DeepLTranslator
+
+Wagtail Translation has a [DeepL](https://www.deepl.com) translator.
 Install and configure it as follows:
 
 - `pip install deepl`
 - Get a DeepL API key from https://www.deepl.com/pro#developer
 - Add `WAGTAIL_TRANSLATE_DEEPL_KEY = "..."` to your settings.
-- Change `WAGTAIL_TRANSLATE_TRANSLATOR` to `"wagtail_translate.translators.deepl.DeepLTranslator"`.
+- Set `WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"`
 
-## Customizing Translation Logic
+## Customise Wagtail Translate
 
-Multi-language projects often have specific requirements for the translation process. Wagtail Translate allows developers to tailor the translation process to their needs.
-
-This section provides examples of how to customize the translation logic. These are illustrations and not mandatory for using this package.
-
-### Customizing the translation process, the basics
-
-In `settings.py`:
-- Remove `"wagtail_translate.default_behaviour"` from `INSTALLED_APPS`.
-- Remove `WAGTAIL_TRANSLATE_TRANSLATOR = "..."` from the settings.
-
-In one of your project apps, in `apps.py`:
-
-```python
-from django.apps import AppConfig
-
-
-class YourAppConfig(AppConfig):
-    name = "your_app"
-
-    def ready(self):
-        from . import signals  # noqa
-```
-Add `signals.py` to your app:
-
-```python
-from django.dispatch import receiver
-from wagtail.models import Page
-
-from wagtail_translate.translators.deepl import DeepLTranslator
-
-# Wagtail 6.2 introduces the `copy_for_translation_done` signal.
-try:
-    from wagtail.signals import copy_for_translation_done
-except ImportError:
-    from wagtail_translate.signals import copy_for_translation_done
-
-@receiver(copy_for_translation_done)
-def handle_translation_done_signal(sender, source_obj, target_obj, **kwargs):
-    # Get the source and target language codes
-    source_language_code = source_obj.locale.language_code
-    target_language_code = target_obj.locale.language_code
-
-    # Initialize the translator, and translate.
-    translator = DeepLTranslator(source_language_code, target_language_code)
-    translated_obj = translator.translate_obj(source_obj, target_obj)
-
-    # Differentiate between regular Django model and Wagtail Page.
-    if isinstance(translated_obj, Page):
-        translated_obj.save_revision()
-    else:
-        translated_obj.save()
-```
-
-You now have ejected from the Wagtail Translate default behaviour and can customize the translation process.
-
-### Using a custom translation service
-
-You might want to connect to your preferred machine translation service, subclass BaseTranslator:
-
-```python
-# your_app/translators.py
-
-from wagtail_translate.translators.base import BaseTranslator
-
-class CustomTranslator(BaseTranslator):
-    def translate(self, source_string: str) -> str:
-        """
-        Translate, a function that does the actual translation.
-        Add a call to your preferred translation service.
-
-        You'd supply the following values to the translation service:
-        - source_string
-        - self.source_language_code
-        - self.target_language_code
-        """
-        translation = ...  # Your translation logic here
-        return translation
-```
-Import your `CustomTranslator` in `signals.py` and use it.
-
-### Using different translation services for various languages
-
-For example, DeepL doesn't support Icelandic. So, we want to use some `CustomIcelandicTranslator` for Icelandic translations and `DeeplTranslator` for other languages.
-
-```python
-...
-
-@receiver(copy_for_translation_done)
-def my_translation_done_receiver(sender, source_obj, target_obj, **kwargs):
-    source_language_code = source_obj.locale.language_code
-    target_language_code = target_obj.locale.language_code
-
-    if source_language_code == "is" or target_language_code == "is":
-        translator_class = CustomIcelandicTranslator
-    else:
-        translator_class = DeeplTranslator
-
-    translator = translator_class(source_language_code, target_language_code)
-    translated_obj = translator.translate_obj(source_obj, target_obj)
-
-    if isinstance(translated_obj, Page):
-        translated_obj.save_revision()
-    else:
-        translated_obj.save()
-```
-
-### Direct publishing of translations
-
-Change `translated_obj.save_revision()` to `translated_obj.save_revision().publish()` to publish the translated page directly.
-
-### Store the source locale on the translated object
-
-Sometimes it is useful to content editors to know the source language of the translated object. This can be done by adding a `source_locale` field to the model:
-
-```python
-class MyTranslatedModel(models.Model):
-    source_locale = models.ForeignKey(Locale, blank=True, null=True, on_delete=models.SET_NULL)
-    ...
-
-    panels = [
-        FieldPanel("source_locale", readonly=True),
-    ]
-```
-Run `makemigrations` and `migrate` to add the field to the database.
-
-Set the field in the signal receiver:
-
-```python
-@receiver(copy_for_translation_done)
-def my_translation_done_receiver(sender, source_obj, target_obj, **kwargs):
-    ...
-    translated_obj.source_locale = source_obj.locale
-    translated_obj.save()
-```
-
+See: [docs/customise_wagtail_translate.md](https://github.com/allcaps/wagtail-translate/tree/main/docs/customise_wagtail_translate.md).
 
 ## Contributing
 
@@ -248,7 +120,7 @@ With your preferred virtualenv activated, install testing dependencies:
 #### Using pip
 
 ```sh
-python -m pip install --upgrade pip>=21.3
+python -m pip install --upgrade pip
 python -m pip install -e '.[testing]' -U
 ```
 
@@ -266,12 +138,12 @@ It is included in the project testing requirements. To set up locally:
 
 ```sh
 # go to the project directory
-$ cd wagtail-translate
+cd wagtail-translate
 # initialize pre-commit
-$ pre-commit install
+pre-commit install
 
 # Optional, run all checks once for this, then the checks will run only on the changed files
-$ git ls-files --others --cached --exclude-standard | xargs pre-commit run --files
+git ls-files --others --cached --exclude-standard | xargs pre-commit run --files
 ```
 
 ### How to run tests
