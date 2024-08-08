@@ -1,6 +1,7 @@
 extend-exclude = [
     "LC_MESSAGES",
     "locale",
+    "env",
 ]
 line-length = 88
 
