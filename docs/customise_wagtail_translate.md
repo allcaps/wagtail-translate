@@ -1,4 +1,4 @@
-## Customise Wagtail Translate
+## How to customise Wagtail Translate
 
 Multi-language projects often have specific requirements for the translation process.
 This page provides examples of how to customize Wagtail Translate to fit your project's needs.

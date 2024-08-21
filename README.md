@@ -1,10 +1,13 @@
 # Wagtail Translate
 
-**Wagtail Translate** adds machine translations to your Wagtail site, with built-in support for [DeepL](https://www.deepl.com) and the flexibility to integrate other translation services. It automatically detects when a page is copied to a new locale and initiates the translation process.
+**Wagtail Translate** adds machine translations to your Wagtail site, with built-in support for [DeepL](https://www.deepl.com) and the flexibility to integrate other translation services.
+It automatically detects when a page is copied to a new locale and initiates the translation process.
 
-For multilingual websites, the recommended packages are [Wagtail Localize](https://wagtail-localize.org/) or [Wagtail Simple Translation](https://docs.wagtail.org/en/stable/reference/contrib/simple_translation.html). Wagtail Localize offers advanced features that may be excessive for many projects, while Wagtail Simple Translation only copies pages to new locales, requiring manual translation.
+[Wagtail Localize](https://wagtail-localize.org/) and [Wagtail Simple Translation](https://docs.wagtail.org/en/stable/reference/contrib/simple_translation.html) are the go-to solutions for multi-language Wagtail projects.
+Wagtail Localize offers advanced features that may be excessive for many projects, while Wagtail Simple Translation only copies pages to new locales, requiring manual translation.
 
-**Wagtail Translate** adds machine translations to Wagtail and works in combination with Simple Translation, offering the ideal solution for projects seeking a simple interface with powerful translation support.
+**Wagtail Translate** adds machine translations to Wagtail.
+It works in combination with Simple Translation, offering the ideal solution for projects seeking a simple interface with powerful translation support.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/wagtail-translate.svg)](https://badge.fury.io/py/wagtail-translate)
