@@ -176,6 +176,8 @@ STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "test-media")
 
+# Django transitional setting
+FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = "Wagtail Translate test site"
