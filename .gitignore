@@ -8,6 +8,8 @@ __pycache__/
 /.tox
 /.venv
 /venv
+/env
+/.env
 /.vscode
 /site
 /test_wagtail_translate.db
@@ -15,4 +17,3 @@ __pycache__/
 /test-static
 /test-media
 /.python-version
-/env/
