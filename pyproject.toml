@@ -33,9 +33,11 @@ dependencies = [
     "Django>=4.2",
     "Wagtail>=5.2"
 ]
+
 [project.optional-dependencies]
 testing = [
     "dj-database-url==2.1.0",
+    "python-dotenv",
     "pre-commit==3.4.0",
     "pytest==8.1.1",
     "pytest-cov==5.0.0",

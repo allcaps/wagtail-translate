@@ -1,0 +1,7 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+
+<h1>{{page.title}}</h1>
+<p>{{ page.publication_date }} - {{ page.category }}</p>
+{% image page.image fill-320x240 %}
+<p>{{ page.intro|richtext }}</p>
+{% include_block page.body %}

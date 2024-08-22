@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup, NavigableString
+from django.db.models import ForeignKey
 from wagtail import blocks
 from wagtail.fields import RichTextField, StreamField
+from wagtail.models import TranslatableMixin
 from wagtail.rich_text import RichText
 
 from ..fields import get_translatable_fields
@@ -158,6 +160,24 @@ class BaseTranslator:
             self.translate_block(block_item)
             item.value[idx] = block_item.value
 
+    def translate_related_object(self, item):
+        """Translate related object,
+
+        Select the translated object if it exists,
+        otherwise keep the current object.
+        """
+        if not isinstance(item, TranslatableMixin):
+            return item
+
+        if (
+            translation := item.get_translations()
+            .filter(locale__language_code=self.target_language_code)
+            .first()
+        ):
+            return translation
+
+        return item
+
     def translate_block(self, item) -> None:
         """
         Translate block,
@@ -180,9 +200,7 @@ class BaseTranslator:
         elif isinstance(item.block, blocks.BlockQuoteBlock):
             item.value = self.translate(item.value)
         elif isinstance(item.block, blocks.ChooserBlock):
-            ...  # TODO, implement
-        elif isinstance(item.block, blocks.PageChooserBlock):
-            ...  # TODO, implement
+            item.value = self.translate_related_object(item.value)
 
         # And to recurse, we need to handle iterables.
         elif isinstance(item.block, blocks.StructBlock):
@@ -248,6 +266,8 @@ class BaseTranslator:
                 translation = self.translate_html(src)
             elif isinstance(field, StreamField):
                 translation = self.translate_blocks(src)
+            elif isinstance(field, ForeignKey):
+                translation = self.translate_related_object(src)
             else:
                 translation = self.translate(src)
             setattr(target_obj, field.name, translation)

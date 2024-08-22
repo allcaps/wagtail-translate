@@ -12,6 +12,12 @@ import os
 
 import dj_database_url
 
+from dotenv import load_dotenv
+
+
+# Load ENV variables from ~/.env
+load_dotenv()
+
 
 # Build paths inside the project like this: os.path.join(PROJECT_DIR, ...)
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -62,8 +68,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
 ]
-
-WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -167,14 +171,21 @@ STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
 
-STATICFILES_DIRS = [os.path.join(PROJECT_DIR, "static")]
-
 STATIC_ROOT = os.path.join(BASE_DIR, "test-static")
 STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "test-media")
 
+# Django transitional setting
+FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # Wagtail settings
-
 WAGTAIL_SITE_NAME = "Wagtail Translate test site"
+WAGTAILADMIN_BASE_URL = "http://127.0.0.1:8000"
+
+# Wagtail Translate
+WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
+
+# Or with DeepL:
+# WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"
+# WAGTAIL_TRANSLATE_DEEPL_KEY = os.environ.get("WAGTAIL_TRANSLATE_DEEPL_KEY", "")

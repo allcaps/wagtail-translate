@@ -7,14 +7,13 @@ from wagtail.models import Page, TranslatableMixin
 
 def get_translatable_fields(model):
     """
-    Derives a list of translatable fields from the given model class.
+    Derives a list of translatable fields (strings) from the given model class.
 
     Arguments:
         model (Model class): The model class to derive translatable fields from.
 
     Returns:
-        list[TranslatableField or SynchronizedField]:
-            A list of TranslatableField and SynchronizedFields that were derived from the model.
+        list: A list of stings, containing the names of translatable fields.
     """
 
     # Set translatable_fields on the model to override the default behaviour.
@@ -63,7 +62,7 @@ def get_translatable_fields(model):
             continue
 
         # Ignore choice fields
-        # These are usually used for enums and should not be translated.
+        # These are usually enums and should not be translated.
         if isinstance(field, models.CharField) and field.choices:
             continue
 
@@ -94,65 +93,11 @@ def get_translatable_fields(model):
                 continue
 
             # Foreign keys to translatable models should be translated.
-            # With the exception of pages that are special because we can localize them at runtime easily.
-            # TODO: Perhaps we need a special type for pages where it links to the translation if availabe,
-            # but falls back to the source if it isn't translated yet?
-            # Note: This exact same decision was made for page chooser blocks in segments/extract.py
             if issubclass(field.related_model, TranslatableMixin) and not issubclass(
                 field.related_model, Page
             ):
-                continue
-                # TODO, implement related Translatable support
-                # translatable_fields.append(field)
+                translatable_fields.append(field)
             else:
                 continue
-
-        # TODO
-        # # Fields that support extracting segments are translatable
-        # elif hasattr(field, "get_translatable_segments"):
-        #     translatable_fields.append(TranslatableField(field))
-        #
-        # else:
-        #     # Everything else is synchronised
-        #     translatable_fields.append(SynchronizedField(field))
-
-    # Add child relations for clusterable models
-    # if issubclass(model, ClusterableModel):
-    #     for child_relation in get_all_child_relations(model):
-    #         # Ignore comments
-    #         if (
-    #             issubclass(model, Page)
-    #             and child_relation.name == COMMENTS_RELATION_NAME
-    #         ):
-    #             continue
-    #
-    #         if issubclass(child_relation.related_model, TranslatableMixin):
-    #             translatable_fields.append(child_relation.name)
-    #         else:
-    #             continue
-
-    # Combine with any overrides defined on the model
-    # override_translatable_fields = getattr(model, "override_translatable_fields", [])
-    #
-    # if override_translatable_fields:
-    #     override_translatable_fields = {
-    #         field.field_name: field for field in override_translatable_fields
-    #     }
-    #
-    #     combined_translatable_fields = []
-    #     for field in translatable_fields:
-    #         if field.field_name in override_translatable_fields:
-    #             combined_translatable_fields.append(
-    #                 override_translatable_fields.pop(field.field_name)
-    #             )
-    #         else:
-    #             combined_translatable_fields.append(field)
-    #
-    #     if override_translatable_fields:
-    #         combined_translatable_fields.extend(override_translatable_fields.values())
-    #
-    #     return combined_translatable_fields
-    #
-    # else:
 
     return translatable_fields
