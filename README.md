@@ -103,9 +103,11 @@ Install and configure it as follows:
 - Add `WAGTAIL_TRANSLATE_DEEPL_KEY = "..."` to your settings.
 - Set `WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"`
 
-## Customise Wagtail Translate
+## Documentation
 
-See: [docs/customise_wagtail_translate.md](https://github.com/allcaps/wagtail-translate/tree/main/docs/customise_wagtail_translate.md).
+- This readme for installation and basic usage.
+- [How to customise Wagtail Translate](https://github.com/allcaps/wagtail-translate/tree/main/docs/customise_wagtail_translate.md)
+- [Explanation](https://github.com/allcaps/wagtail-translate/tree/main/docs/explanation.md)
 
 ## Contributing
 

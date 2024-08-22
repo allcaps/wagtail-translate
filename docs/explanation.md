@@ -1,6 +1,6 @@
 # Explanation
 
-This document outlines the concepts behind Wagtail Translate and explains the motivations for its design choices.
+This document details the concepts underlying Wagtail Translate and explains the reasoning behind its design choices. It aims to enhance and expand your understanding of Wagtail Translation.
 
 ## Idea and positioning
 
@@ -32,8 +32,6 @@ Wagtail Translate is designed to be flexible, allowing you to tailor its behavio
 - Define your own signal handler
 - Customize the translation process
 
-See the [Customization](customization.md) document for more information.
-
 ## Background workers
 
 Wagtail Translate uses external services like DeepL to provide translations. These services can take time, fail to respond, or be offline.
@@ -41,8 +39,6 @@ Wagtail Translate uses external services like DeepL to provide translations. The
 By default, Wagtail Translate handles translations synchronously, meaning they block the current thread, and the user must wait for all translations to complete. This can negatively impact performance and user experience.
 
 Django's [background workers](https://www.djangoproject.com/weblog/2024/may/29/django-enhancement-proposal-14-background-workers/) are an accepted proposal and are in development. Once available, they will offer a unified way to offload tasks. Wagtail Translate is expected to support them. For now, if you need translations offloaded to a background task, you can customize the default behaviors and implement this yourself.
-
-See the [Customization](customization.md) document for more information.
 
 ## Fields to translate
 
@@ -83,5 +79,3 @@ This approach prevents deep traversal as related objects can have related object
 Since Wagtail Translate can't forsee the intended behaviour, it uses the simplest approach: use if the translation exists, otherwise use the original object. This  means that sometimes the content editor needs to step in and translate the related object, and select that related object.
 
 To adjust this behaviour, override `BaseTranslator.translate_related_object`.
-
-See the [Customization](customization.md) document for more information.
