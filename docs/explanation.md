@@ -24,6 +24,24 @@ Wagtail Translate operates at the model level and does not include a user interf
 Wagtail Translate listens for Wagtail's `copy_for_translation_done` signal to initiate the machine translation.
 Wagtail Translate is indifferent on who sends the signal. This could be Simple Translation, other products, or custom code.
 
+The default behavior:
+```mermaid
+sequenceDiagram
+    actor User
+    box Teal Your web-application
+    participant Wagtail
+    participant Wagtail Translate
+    end
+    participant Translation Service
+
+    User->>Wagtail: Translate page
+    Wagtail->>Wagtail Translate: Fire 'copy for translation done' signal
+    Wagtail Translate->>Translation Service: Request translation
+    Translation Service->>Wagtail Translate: Return translated text
+    Wagtail Translate->>Wagtail: Save revision
+    User->>Wagtail: Publish page
+```
+
 ## Customizing default behaviors
 
 Wagtail Translate is designed to be flexible, allowing you to tailor its behavior to your needs.
