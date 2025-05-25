@@ -139,6 +139,7 @@ class BaseTranslator:
             block_item = BlockItem(block=block, value=item.value[block_type])
             self.translate_block(block_item)
             item.value[block_type] = block_item.value
+        return item.value
 
     def translate_stream_block(self, item):
         """Translate StreamBlock,
