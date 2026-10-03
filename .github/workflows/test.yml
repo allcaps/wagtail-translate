@@ -1,11 +1,10 @@
-name: Translate CI
+name: Wagtail Translate CI
 
 on:
   push:
     branches:
       - main
-      - 'stable/**'
-
+      - "stable/**"
   pull_request:
 
 concurrency:
@@ -13,39 +12,27 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read # to fetch code (actions/checkout)
+  contents: read
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
-      - uses: pre-commit/action@v3.0.1
 
-  test-sqlite:
-    runs-on: ubuntu-latest
-    needs: lint
-    strategy:
-      matrix:
-        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    name: Test
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python }}
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install .[ci]
-      - name: Test
-        run: tox
-        env:
-          DB: sqlite
+          python-version: "3.14"
+
+      - name: Install test dependencies
+        run: make install PYTHON_VERSION=3.14
+
+      - name: Run checks and tests
+        run: make test

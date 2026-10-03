@@ -13,28 +13,33 @@ Your content editors will appreciate the simplicity of Wagtail Translate. 🥳
 
 ## Features
 
-- Automatic translation
+- Machine translation
+- Integration with OpenAI compatible LLMs including Ollama (local models)
 - Integration with DeepL
 - Highly customizable
 
 ## Architecture
 
-Wagtail Translate operates at the model level and does not include a user interface. While using Wagtail Translate in combination with Wagtail Simple Translation is the obvious choice, it is not a strict requirement.
+Wagtail Translate operates at the model level. It runs in the background and does not include a user interface.
 
 Wagtail Translate listens for Wagtail's `copy_for_translation_done` signal to initiate the machine translation.
-Wagtail Translate is indifferent on who sends the signal. This could be Simple Translation, other products, or custom code.
+
+Therefore, Wagtail Translate works well in combination with Wagtail Simple Translation. Simple Translation is a Wagtail Core Contrib module and provides the user interface to copy pages to another locale.
+
+Wagtail Translate is indifferent on what triggers the signal. This could be Simple Translation, other products, or custom code.
 
 ## Customizing default behaviors
 
 Wagtail Translate is designed to be flexible, allowing you to tailor its behavior to your needs.
 
 - Provide your own translation service
+- Run in sync or hand of to a background workers.
 - Define your own signal handler
 - Customize the translation process
 
 ## Background workers
 
-Wagtail Translate uses external services like DeepL to provide translations. These services can take time, fail to respond, or be offline.
+Wagtail Translate uses external services like DeepL to provide translations. These services can take time, fail to respond, or have downtime.
 
 By default, Wagtail Translate handles translations synchronously, meaning they block the current thread, and the user must wait for all translations to complete. This can negatively impact performance and user experience.
 
@@ -44,11 +49,15 @@ Django's [background workers](https://www.djangoproject.com/weblog/2024/may/29/d
 
 Wagtail Translate introspects the model definition to identify the fields that need translation. You can control which fields are translated by implementing a `get_translatable_fields` method on your model.
 
-## HTML
+## Context and HTMLDocumentCodec
 
-Wagtail has rich text and raw fields, which may contain HTML. Translating HTML is challenging because the structure (tags and attributes) must remain unchanged, while the text between tags should be translated.
+Wagtail Translate encodes the translatable (page/snippet) into an HTML document.
+The whole document is submitted to the machine translation service as a whole.
+This strategy gives the most context to the translator. For example, a page title is a `h1`. Sign
 
-Wagtail Translate deconstructs HTML and translates the text parts one by one, then reconstructs the HTML with the translated text. However, this process can lead to a lack of context for the translation service. For example:
+
+Wagtail has rich text and raw fields, which may contain HTML. Translating text
+nodes separately loses context. For example:
 
 ```html
 <p>The <em>black</em> cat</p>
@@ -62,20 +71,55 @@ But it should be translated as:
 <p>Le chat <em>noir</em></p>
 ```
 
-Word order can vary across languages, and words may have different meanings depending on the context. For instance, the word "bow" can refer to a weapon for shooting arrows or a gesture of respect. In French, these are translated as "arc" and "révérence," respectively. If translation service has too little context, there is a risk of incorrect translation.
+Word order can vary across languages, and words may have different meanings depending on the context.
+For instance, the word "bow" can refer to a weapon for shooting arrows or a gesture of respect.
+In French, these are translated as "arc" and "révérence," respectively.
+If translation service has too little context, there is a risk of incorrect translation.
 
-Wagtail Translate preserves the HTML structure to prevent broken HTML, as translating tags and attributes could lead to invalid markup.
+Wagtail Translate instead composes one HTML document for the complete page or
+snippet. It uses semantic elements for the title and fields, and nested `div`
+elements for StreamField blocks. The translation service therefore sees all
+selected content and complete rich-text fragments in one request. This allows
+translations such as:
 
-In practice, most HTML translates well, but if you encounter odd translations, this may be the cause. A workaround might be removing the styling from the text before translation and re-apply the styling after.
+```html
+<p>Le chat <em>noir</em></p>
+```
 
-You can alter the HTML translation behavior by providing a custom translation class and overriding the `BaseTranslator.translate_html` method.
+The translated document must preserve its elements and temporary reference IDs.
+Text can move around inline elements where target-language grammar requires it.
+
+URLs, IDs, classes, styles, data attributes, reference-valued ARIA attributes,
+and Wagtail's `linktype`, `embedtype`, and object IDs are replaced with temporary
+references. They are restored locally after validation. Existing non-empty
+`alt`, `title`, and `aria-label` values remain available for translation.
+Technical subtrees such as `script`, `style`, `code`, `pre`, SVG, and MathML stay
+local as opaque values.
+
+HTML preservation is DOM-equivalent rather than byte-for-byte. Quote style,
+attribute ordering, entity spelling, and insignificant formatting may be
+normalized, while element structure and attribute values remain equivalent.
+
+The complete response is validated before any field is applied. A failure leaves
+the source untouched and the already-created target copy untranslated. DeepL,
+OpenAI-compatible LLMs, ROT13, and custom integrations all use this same document
+contract.
+
+DeepL does not document translation of HTML attribute values, so its
+translator may leave `alt`, `title`, and `aria-label` untranslated.
 
 ## Translation of related objects
 
-For related objects (foreign keys) Wagtail Translate checks if the object is translatable, and if the translations exist. If the translation exists, it is used; otherwise, the original object is used.
+For related objects (foreign keys) Wagtail Translate checks if the object is translatable, and if the translations exist.
+If the translation exists, it is used; otherwise, the original object is used.
 
-This approach prevents deep traversal as related objects can have related objects of their own. It also accommodates intentional cross-language references. For example, a multilingual site might have blogs exclusively in English, requiring links to the English posts regardless of the referencing page's locale.
+This approach prevents deep traversal as related objects can have related objects of their own.
+It also accommodates intentional cross-language references.
+For example, a multilingual site might have blogs exclusively in English, requiring links to the English posts regardless of the referencing page's locale.
 
-Since Wagtail Translate can't forsee the intended behaviour, it uses the simplest approach: use if the translation exists, otherwise use the original object. This  means that sometimes the content editor needs to step in and translate the related object, and select that related object.
+Since Wagtail Translate can't forsee the intended behavior, it uses the simplest approach:
+use if the translation exists, otherwise use the original object.
+This  means that sometimes the content editor needs to step in and translate the related object, and select that related object.
 
-To adjust this behaviour, override `BaseTranslator.translate_related_object`.
+To adjust this behavior, override
+`HTMLDocumentTranslator.translate_related_object`.

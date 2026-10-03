@@ -1,12 +1,11 @@
 import factory
 import wagtail_factories
-
 from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 from wagtail.images import get_image_model_string
 from wagtail.models import Locale, Page
 
-from tests.testapp.models import BlogPostPage
+from tests.testproject.demoapp.models import BlogPostPage
 
 
 class LocaleFactory(factory.django.DjangoModelFactory):

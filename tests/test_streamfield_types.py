@@ -1,15 +1,18 @@
+import re
 import uuid
 
 import pytest
-
 from wagtail.fields import StreamField
 from wagtail_factories import DocumentFactory
 
 from tests.factories import BlogPostPageFactory, ImageFactory, LocaleFactory
-from tests.testapp.models import BlogCategory
-
+from tests.testproject.demoapp.models import BlogCategory
 
 pytestmark = pytest.mark.django_db
+
+
+def normalise_wagtail_block_classes(html):
+    return re.sub(r'\bw-block-[^ "\']+\s*', "", html)
 
 
 def test_body_field_is_streamfield():
@@ -69,12 +72,10 @@ def test_streamfield_stream_block():
         ]
     )
     translation = page.copy_for_translation(LocaleFactory())
-    assert str(translation.body[0].value) == "\n".join(
-        [
-            """<div class="block-paragraph">Bar</div>""",
-            """<div class="block-paragraph">Gjb</div>""",
-            """<div class="block-paragraph">Guerr</div>""",
-        ]
+    assert normalise_wagtail_block_classes(str(translation.body[0].value)) == (
+        '<div class="block-paragraph">Bar</div>\n'
+        '<div class="block-paragraph">Gjb</div>\n'
+        '<div class="block-paragraph">Guerr</div>'
     )
 
 
@@ -111,18 +112,10 @@ def test_streamfield_stream_nested_block():
         ]
     )
     translation = page.copy_for_translation(LocaleFactory())
-    assert str(translation.body[0].value) == "".join(
-        [
-            """<div class="block-stream">""",
-            "\n".join(
-                [
-                    """<div class="block-paragraph">Bar</div>""",
-                    """<div class="block-paragraph">Gjb</div>""",
-                    """<div class="block-paragraph">Guerr</div>""",
-                ]
-            ),
-            """</div>""",
-        ]
+    assert normalise_wagtail_block_classes(str(translation.body[0].value)) == (
+        '<div class="block-stream"><div class="block-paragraph">Bar</div>\n'
+        '<div class="block-paragraph">Gjb</div>\n'
+        '<div class="block-paragraph">Guerr</div></div>'
     )
 
 
@@ -288,13 +281,25 @@ def test_streamfield_document_block():
     assert translation.body[0].value == document
 
 
-def test_streamfield_image_chooser_block():
+def test_streamfield_image_block():
     image = ImageFactory()
     page = BlogPostPageFactory(
-        body=[{"type": "image_chooser", "value": image.pk, "id": str(uuid.uuid4())}]
+        body=[
+            {
+                "type": "image_chooser",
+                "value": {
+                    "image": image.pk,
+                    "decorative": False,
+                    "alt_text": "One Two Three",
+                },
+                "id": str(uuid.uuid4()),
+            }
+        ]
     )
     translation = page.copy_for_translation(LocaleFactory())
-    assert translation.body[0].value == image
+    translated_image = translation.body[0].value
+    assert translated_image.pk == image.pk
+    assert translated_image.contextual_alt_text == "Bar Gjb Guerr"
 
 
 def test_streamfield_snippet_block():
