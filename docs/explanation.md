@@ -70,6 +70,46 @@ In practice, most HTML translates well, but if you encounter odd translations, t
 
 You can alter the HTML translation behavior by providing a custom translation class and overriding the `BaseTranslator.translate_html` method.
 
+### Whole-document LLM translation
+
+The optional Pydantic AI translator addresses the context limitation by sending
+all selected text from one object in a single model run. Fields are serialized in
+the order returned by `get_translatable_fields()`. StreamField values then use
+depth-first block order. This is stable extraction order, not necessarily the
+order chosen by a frontend template.
+
+Every plain-text or HTML value has a readable structural reference. The model
+returns translated values with those references, so response-list order cannot
+move a value into another field or block. Fields, StreamField blocks, paragraphs,
+and list items retain their original location.
+
+Rich text and raw HTML are sent as complete fragments. This lets the model produce
+translations such as:
+
+```html
+<p>Le chat <em>noir</em></p>
+```
+
+The element structure remains fixed, but translated text can move before, inside,
+or after an inline element. This preserves the meaning of formatting without
+forcing the original language's word order.
+
+Non-translatable attributes are never delegated to the model. URLs, IDs, classes,
+styles, data and ARIA attributes, and Wagtail's `linktype`, `embedtype`, and object
+IDs are replaced with temporary references. They are restored from a local map
+after validation. Only existing, non-empty `alt` and `title` values can be
+translated. Technical subtrees such as `script`, `style`, `code`, `pre`, SVG, and
+MathML are also kept locally.
+
+HTML preservation is DOM-equivalent rather than byte-for-byte. Quote style,
+attribute ordering, entity spelling, and insignificant formatting may be
+normalized, while element structure and attribute values remain equivalent.
+
+The complete response is validated before any translated field is applied. A
+failure therefore leaves the source untouched and the already-created Wagtail
+target copy untranslated. The proof-of-concept translator does not split content
+that exceeds a model's context window.
+
 ## Translation of related objects
 
 For related objects (foreign keys) Wagtail Translate checks if the object is translatable, and if the translations exist. If the translation exists, it is used; otherwise, the original object is used.

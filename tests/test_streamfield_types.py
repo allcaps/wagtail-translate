@@ -1,3 +1,4 @@
+import re
 import uuid
 
 import pytest
@@ -10,6 +11,10 @@ from tests.testapp.models import BlogCategory
 
 
 pytestmark = pytest.mark.django_db
+
+
+def normalise_wagtail_block_classes(html):
+    return re.sub(r'\bw-block-[^ "\']+\s*', "", html)
 
 
 def test_body_field_is_streamfield():
@@ -69,7 +74,7 @@ def test_streamfield_stream_block():
         ]
     )
     translation = page.copy_for_translation(LocaleFactory())
-    assert str(translation.body[0].value) == "\n".join(
+    assert normalise_wagtail_block_classes(str(translation.body[0].value)) == "\n".join(
         [
             """<div class="block-paragraph">Bar</div>""",
             """<div class="block-paragraph">Gjb</div>""",
@@ -111,7 +116,7 @@ def test_streamfield_stream_nested_block():
         ]
     )
     translation = page.copy_for_translation(LocaleFactory())
-    assert str(translation.body[0].value) == "".join(
+    assert normalise_wagtail_block_classes(str(translation.body[0].value)) == "".join(
         [
             """<div class="block-stream">""",
             "\n".join(

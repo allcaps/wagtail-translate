@@ -184,8 +184,21 @@ WAGTAIL_SITE_NAME = "Wagtail Translate test site"
 WAGTAILADMIN_BASE_URL = "http://127.0.0.1:8000"
 
 # Wagtail Translate
-WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
+# WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
 
 # Or with DeepL:
 # WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"
 # WAGTAIL_TRANSLATE_DEEPL_KEY = os.environ.get("WAGTAIL_TRANSLATE_DEEPL_KEY", "")
+
+# The interactive tox environment uses the locally served Ollama model. Tests keep
+# using ROT13 so they remain deterministic and never make model requests.
+if os.environ.get("INTERACTIVE"):
+    WAGTAIL_TRANSLATE_TRANSLATOR = (
+        "wagtail_translate.translators.pydantic_ai.PydanticAIDocumentTranslator"
+    )
+    WAGTAIL_TRANSLATE_LLM_MODEL = os.environ.get(
+        "WAGTAIL_TRANSLATE_LLM_MODEL", "ollama:translategemma:27b"
+    )
+    WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS = os.environ.get(
+        "WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS", ""
+    )

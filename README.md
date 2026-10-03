@@ -23,9 +23,9 @@ It works in combination with Simple Translation, offering the ideal solution for
 
 ## Supported versions
 
-- Python 3.8 - 3.12
-- Django 4.2 - 5.0
-- Wagtail 5.2 - 6.0
+- Python 3.10 - 3.14
+- Django 4.2 - 6.0
+- Wagtail 7.0 - 7.4
 
 ## Internationalization
 
@@ -102,6 +102,51 @@ Install and configure it as follows:
 - Get a DeepL API key from https://www.deepl.com/pro#developer
 - Add `WAGTAIL_TRANSLATE_DEEPL_KEY = "..."` to your settings.
 - Set `WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"`
+
+### Pydantic AI document translator
+
+The optional Pydantic AI translator sends all selected text from one object in a
+single request. This gives the model page-wide context while protected HTML and
+Wagtail references remain local.
+
+Install the translator and the integration for your chosen provider. For example,
+with OpenAI:
+
+```sh
+python -m pip install "wagtail-translate[llm]" "pydantic-ai-slim[openai]"
+```
+
+Configure a Pydantic AI model identifier and the translator:
+
+```python
+WAGTAIL_TRANSLATE_TRANSLATOR = (
+    "wagtail_translate.translators.pydantic_ai.PydanticAIDocumentTranslator"
+)
+WAGTAIL_TRANSLATE_LLM_MODEL = "openai:gpt-5-mini"
+
+# Optional terminology, tone, or brand guidance.
+WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS = "Use formal Dutch. Keep ACME untranslated."
+```
+
+Configure credentials through the selected provider's normal environment or
+configuration mechanism. See the customization documentation for validation and
+failure behavior.
+
+For a local Ollama model, install the Ollama extra and provide its OpenAI-compatible
+base URL:
+
+```sh
+python -m pip install "wagtail-translate[ollama]"
+export OLLAMA_BASE_URL="http://localhost:11434/v1"
+```
+
+```python
+WAGTAIL_TRANSLATE_LLM_MODEL = "ollama:translategemma:4b"
+```
+
+The repository's `tox -e interactive` environment uses this configuration by
+default. It expects Ollama to be running on port 11434 with `translategemma:4b`
+installed.
 
 ## Documentation
 

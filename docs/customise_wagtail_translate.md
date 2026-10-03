@@ -27,6 +27,82 @@ class FooTranslator(BaseTranslator):
 
 In your settings, define `WAGTAIL_TRANSLATE_TRANSLATOR = "your_app.translators.FooTranslator"`.
 
+### Whole-document translation with Pydantic AI
+
+The optional document translator sends the selected text for one page or snippet
+to one Pydantic AI model run. It is provider-neutral. Install the package extra
+and the Pydantic AI integration for the provider you want to use. For example:
+
+```sh
+python -m pip install "wagtail-translate[llm]" "pydantic-ai-slim[openai]"
+```
+
+Configure the translator and a Pydantic AI `provider:model` identifier:
+
+```python
+WAGTAIL_TRANSLATE_TRANSLATOR = (
+    "wagtail_translate.translators.pydantic_ai.PydanticAIDocumentTranslator"
+)
+WAGTAIL_TRANSLATE_LLM_MODEL = "openai:gpt-5-mini"
+```
+
+Provider credentials use the provider's standard configuration. For OpenAI, for
+example, set `OPENAI_API_KEY` in the process environment.
+
+You can add project-specific translation guidance without replacing the package's
+structural instructions:
+
+```python
+WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS = """
+Use formal Dutch. Keep product names and ACME untranslated.
+"""
+```
+
+The translator validates the complete structured response before changing the
+target object. Fragment references must be complete and unique, HTML elements
+must retain the same structure, and protected attributes must retain their local
+references. Pydantic AI gets one repair attempt when these checks fail.
+
+If the model request or validation still fails, the translator raises a
+`DocumentTranslationRequestError` or `DocumentTranslationValidationError`. It
+does not partially apply fields. Wagtail has already created the target copy when
+the translation signal runs, so that untranslated copy remains available for
+review or retry.
+
+The default signal handler remains synchronous. Use a custom signal handler, as
+described below, when requests need to run through a background worker or custom
+retry policy.
+
+#### Local Ollama
+
+Ollama exposes an OpenAI-compatible endpoint, so its Pydantic AI integration uses
+the `openai` provider dependency. Install the convenience extra:
+
+```sh
+python -m pip install "wagtail-translate[ollama]"
+```
+
+Start Ollama, make sure the model is installed, and configure its endpoint:
+
+```sh
+ollama pull translategemma:4b
+export OLLAMA_BASE_URL="http://localhost:11434/v1"
+```
+
+Then select it in Django:
+
+```python
+WAGTAIL_TRANSLATE_TRANSLATOR = (
+    "wagtail_translate.translators.pydantic_ai.PydanticAIDocumentTranslator"
+)
+WAGTAIL_TRANSLATE_LLM_MODEL = "ollama:translategemma:4b"
+```
+
+No Hugging Face tokenizer or `AutoModelForCausalLM` is needed: Ollama owns model
+loading and inference. The translator automatically uses Ollama's native JSON
+schema output instead of tool calling, which allows completion-only models such
+as TranslateGemma to return the required structured response.
+
 
 ### Advanced custom behaviour
 
