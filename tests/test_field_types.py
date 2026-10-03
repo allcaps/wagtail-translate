@@ -1,11 +1,9 @@
 import pytest
-
 from django.db import models
 from wagtail.fields import RichTextField
 
 from tests.factories import BlogPostPageFactory, LocaleFactory
-from tests.testapp.models import BlogCategory, BlogPostPage
-
+from tests.testproject.demoapp.models import BlogCategory, BlogPostPage
 
 pytestmark = pytest.mark.django_db
 

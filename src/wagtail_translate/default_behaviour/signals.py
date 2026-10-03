@@ -3,13 +3,7 @@ import importlib
 from django.conf import settings
 from django.dispatch import receiver
 from wagtail.models import Page
-
-
-# Wagtail 6.2 introduces the `copy_for_translation_done` signal.
-try:
-    from wagtail.signals import copy_for_translation_done
-except ImportError:
-    from wagtail_translate.signals import copy_for_translation_done
+from wagtail.signals import copy_for_translation_done
 
 
 def load_class(class_path):
@@ -22,6 +16,10 @@ def load_class(class_path):
 
 @receiver(copy_for_translation_done)
 def handle_translation_done_signal(sender, source_obj, target_obj, **kwargs):
+    # If the page is not published, use the latest revision.
+    if isinstance(source_obj, Page) and not source_obj.live:
+        source_obj = source_obj.get_latest_revision_as_object()
+
     # Get the source and target language codes
     source_language_code = source_obj.locale.language_code
     target_language_code = target_obj.locale.language_code

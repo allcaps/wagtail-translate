@@ -3,10 +3,10 @@ from wagtail import blocks
 from wagtail.admin.panels import FieldPanel
 from wagtail.documents.blocks import DocumentChooserBlock
 from wagtail.fields import RichTextField, StreamField
+from wagtail.images.blocks import ImageBlock as WagtailImageBlock
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.models import Page, TranslatableMixin
 from wagtail.snippets.blocks import SnippetChooserBlock
-from wagtail.snippets.models import register_snippet
 
 
 class HomePage(Page):
@@ -29,7 +29,6 @@ class BlogIndexPage(Page):
     ]
 
 
-@register_snippet
 class BlogCategory(TranslatableMixin):
     name = models.CharField(max_length=255)
 
@@ -86,7 +85,7 @@ class BlogPostPage(Page):
             ("block_quote", blocks.BlockQuoteBlock()),
             ("page", blocks.PageChooserBlock()),
             ("document", DocumentChooserBlock()),
-            ("image_chooser", ImageChooserBlock()),
+            ("image_chooser", WagtailImageBlock()),
             ("snippet", SnippetChooserBlock(BlogCategory)),
         ],
         use_json_field=True,

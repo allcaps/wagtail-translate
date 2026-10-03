@@ -1,72 +1,40 @@
-"""
-Django settings for temp project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/stable/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/stable/ref/settings/
-"""
-
 import os
+from pathlib import Path
 
-import dj_database_url
+BASE_DIR = Path(__file__).resolve().parent
 
-from dotenv import load_dotenv
-
-
-# Load ENV variables from ~/.env
-load_dotenv()
-
-
-# Build paths inside the project like this: os.path.join(PROJECT_DIR, ...)
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = os.path.dirname(PROJECT_DIR)
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/stable/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "not-a-secure-key"  # noqa: S105
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = "wagtail-exact-crop-test-key"  # noqa S105
 DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
-
-
-# Application definition
+ALLOWED_HOSTS = ["*"]
+ROOT_URLCONF = "tests.testproject.urls"
+USE_TZ = True
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = [
-    "tests.testapp",
+    "tests.testproject.demoapp.apps.DemoAppConfig",
     "wagtail_translate",
     "wagtail_translate.default_behaviour",
     "wagtail.contrib.simple_translation",
     "wagtail.locales",
-    "wagtail.contrib.search_promotions",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
+    "wagtail.sites",
     "wagtail.users",
     "wagtail.snippets",
     "wagtail.documents",
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
-    "wagtail.api.v2",
-    "wagtail.contrib.routable_page",
-    "wagtail.contrib.styleguide",
-    "wagtail.sites",
     "wagtail",
+    "modelcluster",
     "taggit",
-    "rest_framework",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sitemaps",
 ]
 
 MIDDLEWARE = [
@@ -81,83 +49,42 @@ MIDDLEWARE = [
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
 
-ROOT_URLCONF = "tests.testproject.urls"
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
         "APP_DIRS": True,
+        "DIRS": [],
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ]
+            ],
         },
     }
 ]
 
 
-# Using DatabaseCache to make sure that the cache is cleared between tests.
-# This prevents false-positives in some wagtail core tests where we are
-# changing the 'wagtail_root_paths' key which may cause future tests to fail.
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache",
-    }
-}
-
-
-# don't use the intentionally slow default password hasher
-PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
-
-
-# Database
-# https://docs.djangoproject.com/en/stable/ref/settings/#databases
-
-DATABASES = {
-    "default": dj_database_url.config(default="sqlite:///test_wagtail_translate.db"),
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/stable/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/stable/topics/i18n/
-
 LANGUAGE_CODE = "en"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
 WAGTAIL_I18N_ENABLED = True
-
-
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     (LANGUAGE_CODE, "English"),
     ("fr", "French"),
     ("nl", "Dutch"),
+    ("is", "Icelandic"),
+    ("de", "German"),
+    ("it", "Italian"),
 ]
-
 
 MIDDLEWARE += [
     "django.middleware.locale.LocaleMiddleware",
@@ -165,27 +92,48 @@ MIDDLEWARE += [
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/stable/howto/static-files/
-
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
-
-STATIC_ROOT = os.path.join(BASE_DIR, "test-static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "test-media")
-
-# Django transitional setting
-FORMS_URLFIELD_ASSUME_HTTPS = True
-
-# Wagtail settings
-WAGTAIL_SITE_NAME = "Wagtail Translate test site"
+WAGTAIL_SITE_NAME = "Wagtail Translate Test Project"
 WAGTAILADMIN_BASE_URL = "http://127.0.0.1:8000"
 
-# Wagtail Translate
-WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.rot13.ROT13Translator"
 
-# Or with DeepL:
-# WAGTAIL_TRANSLATE_TRANSLATOR = "wagtail_translate.translators.deepl.DeepLTranslator"
+# ROT13HTMLDocumentTranslator for testing purposes.
+# Is deterministic and does not depend on external services.
+# ----------------------------
+WAGTAIL_TRANSLATE_TRANSLATOR = (
+    "wagtail_translate.translators.rot13.ROT13HTMLDocumentTranslator"
+)
+
+# Deepl
+# ----------------------------
+# WAGTAIL_TRANSLATE_TRANSLATOR = (
+#     "wagtail_translate.translators.deepl.DeepLHTMLDocumentTranslator"
+# )
 # WAGTAIL_TRANSLATE_DEEPL_KEY = os.environ.get("WAGTAIL_TRANSLATE_DEEPL_KEY", "")
+
+# Ollama local model Translategemma 27b
+# ----------------------------
+# WAGTAIL_TRANSLATE_TRANSLATOR = (
+#     "wagtail_translate.translators.openai_compatible.LLMHTMLDocumentTranslator"
+# )
+# WAGTAIL_TRANSLATE_LLM_MODEL = os.environ.get(
+#     "WAGTAIL_TRANSLATE_LLM_MODEL", "translategemma:27b"
+# )
+# WAGTAIL_TRANSLATE_LLM_BASE_URL = os.environ.get(
+#     "WAGTAIL_TRANSLATE_LLM_BASE_URL", "http://localhost:11434/v1/"
+# )
+# WAGTAIL_TRANSLATE_LLM_API_KEY = os.environ.get(
+#     "WAGTAIL_TRANSLATE_LLM_API_KEY", "ollama"
+# )
+# # TODO, should this be a dict with instruction per target language?
+# WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS = os.environ.get(
+#     "WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS"
+# )

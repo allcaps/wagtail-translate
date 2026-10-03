@@ -1,19 +1,21 @@
 import codecs
 
-from wagtail_translate.translators.base import BaseTranslator
+from bs4 import BeautifulSoup, NavigableString
+
+from .document import HTMLDocumentTranslator
 
 
-class ROT13Translator(BaseTranslator):
-    def translate(self, source_string: str) -> str:
-        """
-        ROT13 is its own inverse. Because there are 26 letters (2×13) in the
-        Latin alphabet, applying ROT13 to a piece of text twice will give the
-        original text.
+class ROT13HTMLDocumentTranslator(HTMLDocumentTranslator):
+    """Deterministic whole-document translator for tests and demonstrations."""
 
-        ROT13Translator.translate is deterministic and therefore used in tests.
+    def translate_document_html(self, html: str) -> str:
+        soup = BeautifulSoup(html, "html.parser")
+        for text_node in list(soup.find_all(string=True)):
+            if isinstance(text_node, NavigableString):
+                text_node.replace_with(codecs.encode(str(text_node), "rot13"))
 
-        Rot13 does not need the language codes, but a real translation service would.
-        - self.source_language_code
-        - self.target_language_code
-        """
-        return codecs.encode(source_string, "rot13")
+        for tag in soup.find_all(True):
+            for attribute in self.translatable_html_attributes:
+                if tag.get(attribute):
+                    tag[attribute] = codecs.encode(str(tag[attribute]), "rot13")
+        return str(soup)

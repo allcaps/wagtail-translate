@@ -7,26 +7,67 @@ This page provides examples of how to customize Wagtail Translate to fit your pr
 
 A custom translator allows you to integrate with any machine translation service.
 
-To create a custom translator, subclass the `BaseTranslator`  and override `translate`. In `your_app/translators.py`:
+To create a custom translator, subclass `HTMLDocumentTranslator` and implement one
+method that translates a complete protected HTML document:
 
 ```python
-from wagtail_translate.translators.base import BaseTranslator
+from wagtail_translate.translators.document import HTMLDocumentTranslator
 
 import foo_translation_service
 
-class FooTranslator(BaseTranslator):
-    def translate(self, source_string: str) -> str:
-        # Use the translation service to translate the text
-        translation = foo_translation_service(
-            source_string,
+class FooTranslator(HTMLDocumentTranslator):
+    def translate_document_html(self, html: str) -> str:
+        return foo_translation_service(
+            html,
             self.source_language_code,
             self.target_language_code
         )
-        return translation
 ```
 
 In your settings, define `WAGTAIL_TRANSLATE_TRANSLATOR = "your_app.translators.FooTranslator"`.
 
+### Whole-document translation with a local LLM
+
+The optional LLM translator sends the protected HTML document to an
+OpenAI-compatible Chat Completions endpoint. It defaults to local Ollama:
+
+```sh
+python -m pip install "wagtail-translate[llm]"
+```
+
+Configure the translator and model:
+
+```python
+WAGTAIL_TRANSLATE_TRANSLATOR = (
+    "wagtail_translate.translators.openai_compatible.LLMHTMLDocumentTranslator"
+)
+WAGTAIL_TRANSLATE_LLM_MODEL = "translategemma:4b"
+WAGTAIL_TRANSLATE_LLM_BASE_URL = "http://localhost:11434/v1/"
+WAGTAIL_TRANSLATE_LLM_API_KEY = "ollama"
+```
+
+You can add project-specific translation guidance without replacing the package's
+structural instructions:
+
+```python
+WAGTAIL_TRANSLATE_LLM_INSTRUCTIONS = """
+Use formal Dutch. Keep product names and ACME untranslated.
+"""
+```
+
+The translator validates the complete HTML response before changing the target
+object. Field, block, attribute, and opaque-node references must remain complete
+and unique, and HTML elements must retain the same structure.
+
+If the model request or validation still fails, the translator raises a
+`DocumentTranslationRequestError` or `DocumentTranslationValidationError`. It
+does not partially apply fields. Wagtail has already created the target copy when
+the translation signal runs, so that untranslated copy remains available for
+review or retry.
+
+The default signal handler remains synchronous. Use a custom signal handler, as
+described below, when requests need to run through a background worker or custom
+retry policy.
 
 ### Advanced custom behaviour
 
@@ -56,13 +97,9 @@ from wagtail.models import Page
 
 # Direct import of the translator class,
 # makes the WAGTAIL_TRANSLATE_TRANSLATOR setting redundant.
-from wagtail_translate.translators.deepl import DeepLTranslator
+from wagtail_translate.translators.deepl import DeepLHTMLDocumentTranslator
 
-# Wagtail 6.2 introduces the `copy_for_translation_done` signal.
-try:
-    from wagtail.signals import copy_for_translation_done
-except ImportError:
-    from wagtail_translate.signals import copy_for_translation_done
+from wagtail.signals import copy_for_translation_done
 
 @receiver(copy_for_translation_done)
 def translation_done_receiver(sender, source_obj, target_obj, **kwargs):
@@ -71,7 +108,9 @@ def translation_done_receiver(sender, source_obj, target_obj, **kwargs):
     target_language_code = target_obj.locale.language_code
 
     # Initialize the translator, and translate.
-    translator = DeepLTranslator(source_language_code, target_language_code)
+    translator = DeepLHTMLDocumentTranslator(
+        source_language_code, target_language_code
+    )
     translated_obj = translator.translate_obj(source_obj, target_obj)
 
     # Save the translated object
@@ -87,7 +126,8 @@ You now have ejected from the Wagtail Translate default behaviour and can custom
 
 Using different translation services for different languages allows you to choose the best tool for each language, improving translation accuracy and reliability.
 
-DeepL doesn't support Icelandic. So, we want to use some `CustomIcelandicTranslator` for Icelandic translations and `DeeplTranslator` for all other languages.
+If one service does not support a language, select a custom translator for that
+language and `DeepLHTMLDocumentTranslator` for the others.
 
 ```python
 ...
@@ -103,7 +143,7 @@ def translation_done_receiver(sender, source_obj, target_obj, **kwargs):
     if source_language_code == ICELANDIC or target_language_code == ICELANDIC:
         translator_class = CustomIcelandicTranslator
     else:
-        translator_class = DeeplTranslator
+        translator_class = DeepLHTMLDocumentTranslator
 
     translator = translator_class(source_language_code, target_language_code)
     translated_obj = translator.translate_obj(source_obj, target_obj)
